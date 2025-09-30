@@ -90,22 +90,39 @@ agent_executor = AgentExecutor(
     return_intermediate_steps=True  # See what went wrong
 )
 
-test_queries = [
-    "What is the population of Tokyo? Multiply it by 2.",
-    "Who was Albert Einstein and when was he born?",
-    "Calculate 157 * 89 and tell me if it's greater than 10000"
-]
+# test_queries = [
+#     "What is the population of Tokyo? Multiply it by 2.",
+#     "Who was Albert Einstein and when was he born?",
+#     "Calculate 157 * 89 and tell me if it's greater than 10000"
+# ]
 
 
-for query in test_queries:
-    print(f"\n{'='*50}")
-    print(f"QUERY: {query}")
-    print('='*50)
+# for query in test_queries:
+#     print(f"\n{'='*50}")
+#     print(f"QUERY: {query}")
+#     print('='*50)
+    
+#     try:
+#         response = agent_executor.invoke({"input": query})
+#         print(f"\nFINAL ANSWER: {response['output']}")
+#     except Exception as e:
+#         print(f"Error: {str(e)}")
+    
+#     print()
+
+
+print("\n" + "="*50)
+print("Interactive Mode - Type 'quit' to exit")
+print("="*50 + "\n")
+
+while True:
+    user_input = input("\nYour question: ")
+    if user_input.lower() in ['quit', 'exit', 'q']:
+        print("Goodbye!")
+        break
     
     try:
-        response = agent_executor.invoke({"input": query})
-        print(f"\nFINAL ANSWER: {response['output']}")
+        response = agent_executor.invoke({"input": user_input})
+        print(f"\n✅ Answer: {response['output']}\n")
     except Exception as e:
-        print(f"Error: {str(e)}")
-    
-    print()
+        print(f"❌ Error: {str(e)}\n")
