@@ -8,6 +8,7 @@ from langchain_community.utilities import WikipediaAPIWrapper
 from langchain_huggingface import HuggingFaceEndpoint
 from langchain_community.llms import Ollama
 from langchain.tools import Tool
+import streamlit as st
 
 load_dotenv()
 
@@ -111,18 +112,69 @@ agent_executor = AgentExecutor(
 #     print()
 
 
-print("\n" + "="*50)
-print("Interactive Mode - Type 'quit' to exit")
-print("="*50 + "\n")
+st.title("🤖 ReAct Agent with Streamlit")
+st.markdown("Ask me anything! I can search Wikipedia and do calculations.")
 
-while True:
-    user_input = input("\nYour question: ")
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# Display chat history
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+
+if user_input := st.chat_input("Your question: "):
+    # Add user message
+    st.session_state.messages.append({"role": "user", "content": user_input})
+    with st.chat_message("user"):
+        st.markdown(user_input)
+
     if user_input.lower() in ['quit', 'exit', 'q']:
         print("Goodbye!")
-        break
     
-    try:
-        response = agent_executor.invoke({"input": user_input})
-        print(f"\n✅ Answer: {response['output']}\n")
-    except Exception as e:
-        print(f"❌ Error: {str(e)}\n")
+    # Get agent response
+    else:
+        with st.chat_message("assistant"):
+            with st.spinner("Thinking..."):
+                try:
+                    response = agent_executor.invoke({"input": user_input})
+                    answer = response['output']
+                    st.markdown(answer)
+                    st.session_state.messages.append({"role": "assistant", "content": answer})
+                except Exception as e:
+                    error_msg = f"Error: {str(e)}"
+                    st.error(error_msg)
+                    st.session_state.messages.append({"role": "assistant", "content": error_msg})
+
+# Sidebar with info
+with st.sidebar:
+    st.header("About")
+    st.markdown("""
+    This agent can:
+    - 🔍 Search Wikipedia
+    - 🧮 Perform calculations
+    - 🤔 Reason through complex problems
+    
+    Powered by Ollama - Mistral
+    """)
+    
+    if st.button("Clear Chat History"):
+        st.session_state.messages = []
+        st.rerun()
+
+# print("\n" + "="*50)
+# print("Interactive Mode - Type 'quit' to exit")
+# print("="*50 + "\n")
+
+# while True:
+#     user_input = input("\nYour question: ")
+#     if user_input.lower() in ['quit', 'exit', 'q']:
+#         print("Goodbye!")
+#         break
+    
+#     try:
+#         response = agent_executor.invoke({"input": user_input})
+#         print(f"\n✅ Answer: {response['output']}\n")
+#     except Exception as e:
+#         print(f"❌ Error: {str(e)}\n")
